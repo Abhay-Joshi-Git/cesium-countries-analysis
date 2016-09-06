@@ -1,7 +1,7 @@
-# react-basic-starter-kit
-basic repository to start simple react project - for learning and experiments
+# countries data analysis with Cesiumjs
+This is an example of using Cesiumjs for showing countries related data and analysis
 
-To start, do following - 
+To start, do following -
 
 ```
 
