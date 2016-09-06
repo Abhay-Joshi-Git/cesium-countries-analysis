@@ -7,12 +7,22 @@ import countryConstants from '../../../data/countryConstants.js';
 export default class Countries extends React.Component {
     constructor(props) {
         super();
-        console.log(props);
-        this.state = {
-            enableCountries: props.enableCountries
-        }
-        if (props.enableCountries) {
+        if (props.enableCountries && props.cesiumViewer) {
             this.loadCountries(props.cesiumViewer);
+        }
+        this.state = {
+            enableCountries: props.enableCountries && !!props.cesiumViewer
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if ((!this.state.enableCountries && nextProps.enableCountries) && nextProps.cesiumViewer) {
+            this.loadCountries(nextProps.cesiumViewer);
+        } else if ((this.state.enableCountries) && !(nextProps.enableCountries && nextProps.cesiumViewer)){
+            this.removeCountries(nextProps.cesiumViewer);
+        }
+        this.state = {
+            enableCountries: nextProps.enableCountries && !!nextProps.cesiumViewer
         }
     }
 
@@ -34,7 +44,7 @@ export default class Countries extends React.Component {
                         <label>Enable Countries : </label>
                         <span className="toggle-container">
                             <Toggle
-                                defaultChecked={this.state.enableCountries}
+                                checked={this.state.enableCountries}
                                 onChange={this.onEnableCountriesChange}
                             />
                         </span>
@@ -63,18 +73,13 @@ export default class Countries extends React.Component {
     }
 
     onColorByEconomyChange = (event) => {
-        console.log('dataSources', this.props.cesiumViewer.dataSources._dataSources);
-        //return;
         var countriesDataSource = this.props.cesiumViewer.dataSources._dataSources.find(item =>
             item.name == 'countriesDataSource');
-
 
         if (countriesDataSource && !event.target.checked) {
             CesiumCountryService.disableDataSourceMaterial(countriesDataSource);
             return;
         }
-
-
 
         var categoryColorMap = countryConstants.economicCategories.map(category => {
             var color;
@@ -94,18 +99,29 @@ export default class Countries extends React.Component {
                     color: color
             }
         });
-        console.log(countriesDataSource, categoryColorMap);
         CesiumCountryService.applyColorByEconomycCategory(countriesDataSource, categoryColorMap);
-
     }
 
     onEnableCountriesChange = (event) => {
-        console.log('on enable countries change ', event.target.checked, this.props.CesiumViewer.dataSources);
-        this.loadCountries(this.props.cesiumViewer);
+        if (event.target.checked) {
+            this.loadCountries(this.props.cesiumViewer);
+        } else {
+            this.removeCountries(this.props.cesiumViewer);
+        }
+        this.setState({
+            enableCountries: event.target.checked
+        });
     }
 
     loadCountries = (viewer) => {
         CesiumCountryService.loadCountries(viewer, countriesData);
+    }
+
+    removeCountries = (viewer) => {
+        var countriesDataSource = viewer.dataSources._dataSources.find(item =>
+            item.name == 'countriesDataSource');
+
+        CesiumCountryService.removeCountries(viewer, countriesDataSource);
     }
 
 

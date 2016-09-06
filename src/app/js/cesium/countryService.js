@@ -34,6 +34,10 @@ export default {
         });
     },
 
+    removeCountries: function(viewer, dataSource) {
+        viewer.dataSources.remove(dataSource, true);
+    },
+
     applyColorByEconomycCategory: function(dataSource, categoryColorMap) {
         var entities = dataSource.entities.values;
         var len = dataSource.entities.values.length;
