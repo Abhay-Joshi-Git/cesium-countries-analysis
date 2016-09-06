@@ -1,33 +1,37 @@
 
 export default {
     loadCountries: function(viewer, data) {
-        var promise = Cesium.GeoJsonDataSource.load(data);
-        
+        var dataSource = new Cesium.GeoJsonDataSource('countriesDataSource')
+        var promise = dataSource.load(data);
 
         promise.then(function(dataSource) {
-               viewer.dataSources.add(dataSource);
-               var entities = dataSource.entities.values;
-               var len = dataSource.entities.values.length;
+            viewer.dataSources.add(dataSource);
+        }).otherwise(function(error){
+            window.alert(error);
+        });
+    },
 
-               var colorHash = {};
-               for (var i = 0; i < len; i++) {
-                   var entity = entities[i];
-                   var name = entity.name;
-                   var color = Cesium.Color.Blue;
-                   var color = colorHash[name];
-                      if (!color) {
-                          color = Cesium.Color.fromRandom({
-                              alpha : 1.0
-                          });
-                          colorHash[name] = color;
-                      }
+    applyColorByEconomycCategory: function(dataSource, categoryColorMap) {
+        var entities = dataSource.entities.values;
+        var len = dataSource.entities.values.length;
 
-                   if (entity.polygon) {
-                       //entity.polygon.material = color;
-                   }
-               }
-           }).otherwise(function(error){
-               window.alert(error);
-           });
+        for (var i = 0; i < len; i++) {
+            let color = Cesium.Color.WHITE;
+            let entity = entities[i];
+            let category = categoryColorMap.find(item => {
+                return item.dataValues.includes(entity.properties.economy)
+            });
+            if (category) {
+                color = category.color;
+            }
+
+            color = Cesium.Color.fromAlpha(
+                color,
+                0.8
+            );
+            if (entity.polygon) {
+                entity.polygon.material = color;
+            }
+        }
     }
 }

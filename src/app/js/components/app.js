@@ -13,6 +13,6 @@ export default () => (
         <h3 className="text-center">Selection Panel</h3>
 
         <br />
-        <Countries enableCountries={true} CesiumViewer={viewer} />
+        <Countries enableCountries={true} cesiumViewer={viewer} />
     </div>
 );
