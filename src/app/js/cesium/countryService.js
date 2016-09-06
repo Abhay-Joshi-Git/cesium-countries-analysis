@@ -1,3 +1,18 @@
+const defaultColor = {
+    red: 255,
+    green: 220,
+    blue: 0,
+    alpha: 125
+};
+
+const getDefaultColor = () => {
+    return Cesium.Color.fromBytes(
+        defaultColor.red,
+        defaultColor.green,
+        defaultColor.blue,
+        defaultColor.alpha
+    );
+};
 
 export default {
     loadCountries: function(viewer, data) {
@@ -6,6 +21,14 @@ export default {
 
         promise.then(function(dataSource) {
             viewer.dataSources.add(dataSource);
+            var entities = dataSource.entities.values;
+            var len = dataSource.entities.values.length;
+            for (var i = 0; i < len; i++) {
+                let entity = entities[i];
+                if (entity.polygon) {
+                    entity.polygon.material = getDefaultColor()
+                }
+            }
         }).otherwise(function(error){
             window.alert(error);
         });
@@ -14,6 +37,7 @@ export default {
     applyColorByEconomycCategory: function(dataSource, categoryColorMap) {
         var entities = dataSource.entities.values;
         var len = dataSource.entities.values.length;
+        console.log('original color', entities[0].polygon.material);
 
         for (var i = 0; i < len; i++) {
             let color = Cesium.Color.WHITE;
@@ -25,13 +49,24 @@ export default {
                 color = category.color;
             }
 
-            color = Cesium.Color.fromAlpha(
-                color,
-                0.8
-            );
             if (entity.polygon) {
                 entity.polygon.material = color;
             }
         }
+    },
+
+    disableDataSourceMaterial: function(dataSource) {
+        var entities = dataSource.entities.values;
+        var len = dataSource.entities.values.length;
+
+        for (var i = 0; i < len; i++) {
+            let entity = entities[i];
+            if (entity.polygon) {
+                entity.polygon.material = getDefaultColor();
+            }
+        }
+
+
+
     }
 }

@@ -62,11 +62,20 @@ export default class Countries extends React.Component {
         )
     }
 
-    onColorByEconomyChange = () => {
+    onColorByEconomyChange = (event) => {
         console.log('dataSources', this.props.cesiumViewer.dataSources._dataSources);
         //return;
         var countriesDataSource = this.props.cesiumViewer.dataSources._dataSources.find(item =>
             item.name == 'countriesDataSource');
+
+
+        if (countriesDataSource && !event.target.checked) {
+            CesiumCountryService.disableDataSourceMaterial(countriesDataSource);
+            return;
+        }
+
+
+
         var categoryColorMap = countryConstants.economicCategories.map(category => {
             var color;
             switch (category.categoryName) {
