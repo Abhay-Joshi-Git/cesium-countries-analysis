@@ -15,7 +15,7 @@ export default class App extends React.Component {
     render() {
         return (
             <div className="full-height">
-                <div id="selectionPanel" className="custom-options-container full-height col-sm-4">
+                <div id="selectionPanel" className="custom-options-container full-height col-sm-3">
                     <h3 className="text-center">Selection Panel</h3>
                     <br />
                     <Countries
@@ -25,7 +25,7 @@ export default class App extends React.Component {
                         removeLegend={this.removeLegend}
                     />
                 </div>
-                <div className="cesium-viewer-container full-height col-sm-8">
+                <div className="cesium-viewer-container full-height col-sm-9">
                     <div>
                         <LegendContainer legends={this.state.legends} />
                     </div>

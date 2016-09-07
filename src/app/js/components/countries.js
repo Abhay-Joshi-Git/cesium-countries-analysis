@@ -39,16 +39,14 @@ export default class Countries extends React.Component {
 
     getEnableCountriesToggleUI() {
         return (
-            <div className='panel panel-default col-sm-12'>
-                <div className='panel-body'>
-                        <label>Enable Countries : </label>
-                        <span className='toggle-container'>
-                            <Toggle
-                                checked={this.state.enableCountries}
-                                onChange={this.onEnableCountriesChange}
-                            />
-                        </span>
-                </div>
+            <div className='well well-sm text-center col-sm-12'>
+                <label>Enable Countries : </label>
+                <span className='toggle-container'>
+                    <Toggle
+                        checked={this.state.enableCountries}
+                        onChange={this.onEnableCountriesChange}
+                    />
+                </span>
             </div>
         )
     }
@@ -59,15 +57,13 @@ export default class Countries extends React.Component {
 
     getColorByEconomyToggleUI() {
         return (
-            <div className='panel panel-default col-sm-12'>
-                <div className='panel-body'>
-                        <label>Color By Economy : </label>
-                        <span className='toggle-container'>
-                            <Toggle
-                                onChange={this.onColorByEconomyChange}
-                            />
-                        </span>
-                </div>
+            <div className='well well-sm text-center col-sm-12'>
+                <label>Color By Economy : </label>
+                <span className='toggle-container'>
+                    <Toggle
+                        onChange={this.onColorByEconomyChange}
+                    />
+                </span>
             </div>
         )
     }
