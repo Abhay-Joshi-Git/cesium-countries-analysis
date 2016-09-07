@@ -41,7 +41,6 @@ export default {
     applyColorByEconomycCategory: function(dataSource, categoryColorMap) {
         var entities = dataSource.entities.values;
         var len = dataSource.entities.values.length;
-        console.log('original color', entities[0].polygon.material);
 
         for (var i = 0; i < len; i++) {
             let color = Cesium.Color.WHITE;
@@ -60,6 +59,8 @@ export default {
     },
 
     disableDataSourceMaterial: function(dataSource) {
+        if (!dataSource) return;
+
         var entities = dataSource.entities.values;
         var len = dataSource.entities.values.length;
 

@@ -19,7 +19,6 @@ export default class App extends React.Component {
                     <h3 className="text-center">Selection Panel</h3>
                     <br />
                     <Countries
-                        enableCountries={true}
                         cesiumViewer={this.state.viewer}
                         addLegend={this.addLegend}
                         removeLegend={this.removeLegend}
@@ -42,14 +41,15 @@ export default class App extends React.Component {
     }
 
     addLegend = (legend) => {
+        this.state.legends.filter(item => item.id !== legend.id);
         this.setState({
             legends: [...this.state.legends, legend]
         });
     }
 
-    removeLegend = (legend) => {
+    removeLegend = (id) => {
         this.setState({
-            legends: this.state.legends.filter(item => item.id != legend.id)
+            legends: this.state.legends.filter(item => item.id != id)
         })
     }
 }

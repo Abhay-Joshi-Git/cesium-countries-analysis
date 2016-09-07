@@ -4,25 +4,23 @@ import countriesData from '../../../data/countries_details.geo.json';
 import CesiumCountryService from '../cesium/countryService.js';
 import countryConstants from '../../../data/countryConstants.js';
 
+const colorByEconomicCategoryLegendId = 'colorByEconomicCategory';
+
 export default class Countries extends React.Component {
     constructor(props) {
         super();
-        if (props.enableCountries && props.cesiumViewer) {
+        if (props.cesiumViewer) {
             this.loadCountries(props.cesiumViewer);
         }
         this.state = {
-            enableCountries: props.enableCountries && !!props.cesiumViewer
+            enableCountries: true,
+            colorByEconomy: false
         }
     }
 
     componentWillReceiveProps(nextProps) {
-        if ((!this.state.enableCountries && nextProps.enableCountries) && nextProps.cesiumViewer) {
+        if ((nextProps.cesiumViewer && !this.props.cesiumViewer) && this.state.enableCountries) {
             this.loadCountries(nextProps.cesiumViewer);
-        } else if ((this.state.enableCountries) && !(nextProps.enableCountries && nextProps.cesiumViewer)){
-            this.removeCountries(nextProps.cesiumViewer);
-        }
-        this.state = {
-            enableCountries: nextProps.enableCountries && !!nextProps.cesiumViewer
         }
     }
 
@@ -43,7 +41,7 @@ export default class Countries extends React.Component {
                 <label>Enable Countries : </label>
                 <span className='toggle-container'>
                     <Toggle
-                        checked={this.state.enableCountries}
+                        checked={this.state.enableCountries && !!this.props.cesiumViewer}
                         onChange={this.onEnableCountriesChange}
                     />
                 </span>
@@ -61,6 +59,8 @@ export default class Countries extends React.Component {
                 <label>Color By Economy : </label>
                 <span className='toggle-container'>
                     <Toggle
+                        checked={this.state.colorByEconomy}
+                        disabled={!this.state.enableCountries}
                         onChange={this.onColorByEconomyChange}
                     />
                 </span>
@@ -68,16 +68,79 @@ export default class Countries extends React.Component {
         )
     }
 
+    onEnableCountriesChange = (event) => {
+        if (event.target.checked) {
+            this.loadCountries(this.props.cesiumViewer);
+        } else {
+            this.removeCountries(this.props.cesiumViewer);
+        }
+        this.setState({
+            enableCountries: !this.state.enableCountries
+        });
+    }
+
+    loadCountries = (viewer) => {
+        CesiumCountryService.loadCountries(viewer, countriesData);
+    }
+
+    removeCountries = (viewer) => {
+        var countriesDataSource = viewer.dataSources._dataSources.find(item =>
+            item.name == 'countriesDataSource');
+
+        CesiumCountryService.removeCountries(viewer, countriesDataSource);
+    }
+
     onColorByEconomyChange = (event) => {
+        this.setState({
+            colorByEconomy: !this.state.colorByEconomy
+        });
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (!this.state.enableCountries && this.state.colorByEconomy) {
+            this.setState({
+                colorByEconomy: false
+            });
+        }
+        if (this.state.colorByEconomy != prevState.colorByEconomy) {
+            this.applyColorByEconomy(this.state.colorByEconomy);
+        }
+    }
+
+    applyColorByEconomy = (enable) => {
+        this.applyColorByEconomyLegend(enable);
+        this.applyColorByEconomyDataSource(enable);
+    }
+
+    applyColorByEconomyDataSource = (enable) => {
         var countriesDataSource = this.props.cesiumViewer.dataSources._dataSources.find(item =>
             item.name == 'countriesDataSource');
 
-        if (countriesDataSource && !event.target.checked) {
-            CesiumCountryService.disableDataSourceMaterial(countriesDataSource);
-            return;
+        if (enable) {
+            if (countriesDataSource) {
+                CesiumCountryService.applyColorByEconomycCategory(countriesDataSource, this.getCategoryColorMap());
+            } else {
+                this.setState({
+                    colorByEconomy: false
+                });
+            }
+        } else {
+            if (countriesDataSource && this.props.cesiumViewer.dataSources.contains(countriesDataSource)) {
+                CesiumCountryService.disableDataSourceMaterial(countriesDataSource);
+            }
         }
+    }
 
-        var categoryColorMap = countryConstants.economicCategories.map(category => {
+    applyColorByEconomyLegend = (enable) => {
+        if (enable) {
+            this.addColorByEconomyLegend();
+        } else {
+            this.removeColorByEconomyLegend();
+        }
+    }
+
+    getCategoryColorMap = () => {
+        return countryConstants.economicCategories.map(category => {
             var color;
             switch (category.categoryName) {
                 case 'leastDeveloped': color = Cesium.Color.RED;
@@ -95,12 +158,16 @@ export default class Countries extends React.Component {
                     color: color
             }
         });
+    }
 
+    addColorByEconomyLegend = () => {
         if (typeof this.props.addLegend == 'function') {
-            this.props.addLegend(this.getColorByEconomicCategoryLegend(categoryColorMap));
+            this.props.addLegend(this.getColorByEconomicCategoryLegend(this.getCategoryColorMap()));
         }
+    }
 
-        CesiumCountryService.applyColorByEconomycCategory(countriesDataSource, categoryColorMap);
+    removeColorByEconomyLegend = () => {
+        this.props.removeLegend(colorByEconomicCategoryLegendId)
     }
 
     getColorByEconomicCategoryLegend = (categoryColorMap) => {
@@ -129,32 +196,8 @@ export default class Countries extends React.Component {
             </div>
         );
         return {
-            id: 'colorByEconomicCategory',
+            id: colorByEconomicCategoryLegendId,
             html: html
         }
     }
-
-    onEnableCountriesChange = (event) => {
-        if (event.target.checked) {
-            this.loadCountries(this.props.cesiumViewer);
-        } else {
-            this.removeCountries(this.props.cesiumViewer);
-        }
-        this.setState({
-            enableCountries: event.target.checked
-        });
-    }
-
-    loadCountries = (viewer) => {
-        CesiumCountryService.loadCountries(viewer, countriesData);
-    }
-
-    removeCountries = (viewer) => {
-        var countriesDataSource = viewer.dataSources._dataSources.find(item =>
-            item.name == 'countriesDataSource');
-
-        CesiumCountryService.removeCountries(viewer, countriesDataSource);
-    }
-
-
 }
