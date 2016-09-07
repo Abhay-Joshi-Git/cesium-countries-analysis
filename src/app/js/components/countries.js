@@ -28,8 +28,8 @@ export default class Countries extends React.Component {
 
     render() {
         return (
-            <div className="col-sm-12 container">
-                <div className="row">
+            <div className='col-sm-12 container'>
+                <div className='row'>
                     {this.getEnableCountriesToggleUI()}
                     {this.getColorByEconomyUI()}
                 </div>
@@ -39,10 +39,10 @@ export default class Countries extends React.Component {
 
     getEnableCountriesToggleUI() {
         return (
-            <div className="panel panel-default col-sm-12">
-                <div className="panel-body">
+            <div className='panel panel-default col-sm-12'>
+                <div className='panel-body'>
                         <label>Enable Countries : </label>
-                        <span className="toggle-container">
+                        <span className='toggle-container'>
                             <Toggle
                                 checked={this.state.enableCountries}
                                 onChange={this.onEnableCountriesChange}
@@ -59,10 +59,10 @@ export default class Countries extends React.Component {
 
     getColorByEconomyToggleUI() {
         return (
-            <div className="panel panel-default col-sm-12">
-                <div className="panel-body">
+            <div className='panel panel-default col-sm-12'>
+                <div className='panel-body'>
                         <label>Color By Economy : </label>
-                        <span className="toggle-container">
+                        <span className='toggle-container'>
                             <Toggle
                                 onChange={this.onColorByEconomyChange}
                             />
@@ -99,7 +99,43 @@ export default class Countries extends React.Component {
                     color: color
             }
         });
+
+        if (typeof this.props.addLegend == 'function') {
+            this.props.addLegend(this.getColorByEconomicCategoryLegend(categoryColorMap));
+        }
+
         CesiumCountryService.applyColorByEconomycCategory(countriesDataSource, categoryColorMap);
+    }
+
+    getColorByEconomicCategoryLegend = (categoryColorMap) => {
+        var html = categoryColorMap.map(item => {
+            var colorDisplayStyle = {
+                background: item.color.toCssColorString(),
+                display: 'inline-block',
+                width: '15px',
+                height: '1em'
+            }
+            return (
+                <div className='legend-item-container' key={item.categoryName}>
+                    <span className='color-label'>{item.categoryDisplayName}</span>
+                    <div className='color-display-square'
+                        style={colorDisplayStyle}
+                    />
+                </div>
+            );
+        });
+        html = (
+            <div className='legend-group-container'>
+                <h4 className='legend-group-header'>
+                    Economic Category
+                </h4>
+                {html}
+            </div>
+        );
+        return {
+            id: 'colorByEconomicCategory',
+            html: html
+        }
     }
 
     onEnableCountriesChange = (event) => {

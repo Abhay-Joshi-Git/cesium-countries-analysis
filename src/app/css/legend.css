@@ -1,0 +1,21 @@
+.legend-container {
+    position: absolute;
+    top: 5px;
+    left: 20px;
+    z-index: 1;
+    color: white;
+    border: 1px solid white;
+    padding: 5px
+}
+
+.color-label {
+    margin: 10px;
+}
+
+.color-label:first-letter {
+    text-transform: capitalize;
+}
+
+.legend-item-container {
+    text-align: right;
+}

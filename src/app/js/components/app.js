@@ -1,11 +1,14 @@
 import React from "react";
 import Countries from './countries.js';
+import CesiumViewer from './cesiumViewer.js';
+import LegendContainer from './legendContainer.js';
 
 export default class App extends React.Component {
     constructor() {
         super();
         this.state = {
-            viewer: null
+            viewer: null,
+            legends: []
         }
     }
 
@@ -15,11 +18,18 @@ export default class App extends React.Component {
                 <div id="selectionPanel" className="custom-options-container full-height col-sm-4">
                     <h3 className="text-center">Selection Panel</h3>
                     <br />
-                    <Countries enableCountries={true} cesiumViewer={this.state.viewer} />
+                    <Countries
+                        enableCountries={true}
+                        cesiumViewer={this.state.viewer}
+                        addLegend={this.addLegend}
+                        removeLegend={this.removeLegend}
+                    />
                 </div>
                 <div className="cesium-viewer-container full-height col-sm-8">
-                    <div id="cesiumContainer" className="full-height">
+                    <div>
+                        <LegendContainer legends={this.state.legends} />
                     </div>
+                    <CesiumViewer viewerId="cesiumContainer" visible={true}/>
                 </div>
             </div>
         );
@@ -29,5 +39,17 @@ export default class App extends React.Component {
         this.setState({
             viewer: new Cesium.Viewer('cesiumContainer')
         });
+    }
+
+    addLegend = (legend) => {
+        this.setState({
+            legends: [...this.state.legends, legend]
+        });
+    }
+
+    removeLegend = (legend) => {
+        this.setState({
+            legends: this.state.legends.filter(item => item.id != legend.id)
+        })
     }
 }
