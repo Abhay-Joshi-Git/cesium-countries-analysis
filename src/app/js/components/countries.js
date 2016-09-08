@@ -210,7 +210,7 @@ export default class Countries extends React.Component {
             }
         } else {
             if (countriesDataSource && this.props.cesiumViewer.dataSources.contains(countriesDataSource)) {
-                CesiumCountryService.disableDataSourceMaterial(countriesDataSource);
+                CesiumCountryService.removeGDPOpacity(countriesDataSource);
             }
         }
     }
@@ -302,7 +302,7 @@ export default class Countries extends React.Component {
             }
         } else {
             if (countriesDataSource && this.props.cesiumViewer.dataSources.contains(countriesDataSource)) {
-                CesiumCountryService.disableDataSourceMaterial(countriesDataSource);
+                CesiumCountryService.removeColorByEconomyCategory(countriesDataSource);
             }
         }
     }

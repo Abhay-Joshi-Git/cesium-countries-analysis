@@ -1,18 +1,23 @@
 const defaultColor = {
     red: 255,
     green: 220,
-    blue: 80,
-    alpha: 130
+    blue: 80
 };
 
 const getDefaultColor = () => {
-    return Cesium.Color.fromBytes(
-        defaultColor.red,
-        defaultColor.green,
-        defaultColor.blue,
-        defaultColor.alpha
+    return Cesium.Color.fromAlpha(
+        Cesium.Color.fromBytes(
+            defaultColor.red,
+            defaultColor.green,
+            defaultColor.blue
+        ),
+        getDefaultAlpha()
     );
 };
+
+const getDefaultAlpha = () => {
+    return 0.9;
+}
 
 const getDefaultOutlineColor = () => {
     return Cesium.Color.fromAlpha(
@@ -61,12 +66,15 @@ export default {
             }
 
             if (entity.polygon) {
-                entity.polygon.material = color;
+                entity.polygon.material = Cesium.Color.fromAlpha(
+                    color,
+                    entity.polygon._material._color._value.alpha,
+                );
             }
         }
     },
 
-    disableDataSourceMaterial: function(dataSource) {
+    removeColorByEconomyCategory: function(dataSource) {
         if (!dataSource) return;
 
         var entities = dataSource.entities.values;
@@ -75,7 +83,14 @@ export default {
         for (var i = 0; i < len; i++) {
             let entity = entities[i];
             if (entity.polygon) {
-                entity.polygon.material = getDefaultColor();
+                entity.polygon.material = Cesium.Color.fromAlpha(
+                    Cesium.Color.fromBytes(
+                        defaultColor.red,
+                        defaultColor.green,
+                        defaultColor.blue
+                    ),
+                    entity.polygon._material._color._value.alpha,
+                );
             }
         }
     },
@@ -125,7 +140,6 @@ export default {
     applyGDPOpacity: function(dataSource, opacityMap) {
         var entities = dataSource.entities.values;
         var len = dataSource.entities.values.length;
-        console.log('entities[0].polygon', entities[0].polygon);
 
         for (var i = 0; i < len; i++) {
             let color = Cesium.Color.WHITE;
@@ -137,10 +151,6 @@ export default {
                     && (item.GDPRange.min < GDPPerCapita))
             });
 
-            if (entity.properties.name === 'India' || entity.properties.name === 'Nepal') {
-                console.log(GDPPerCapita, entity.polygon._material._color._value, category);
-            }
-
             if (category && entity.polygon) {
                 entity.polygon.material = Cesium.Color.fromAlpha(
                     entity.polygon._material._color._value,
@@ -148,6 +158,22 @@ export default {
                 );
             }
         }
+    },
+
+    removeGDPOpacity: function(dataSource) {
+        var entities = dataSource.entities.values;
+        var len = dataSource.entities.values.length;
+
+        for (var i = 0; i < len; i++) {
+            let entity = entities[i];
+            if (entity.polygon) {
+                entity.polygon.material = Cesium.Color.fromAlpha(
+                    entity.polygon._material._color._value,
+                    getDefaultAlpha()
+                );
+            }
+        }
+
     },
 
     getGDPPerCapita: function(entityProps) {
