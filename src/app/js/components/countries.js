@@ -202,6 +202,7 @@ export default class Countries extends React.Component {
         var countriesDataSource = this.getCountriesDataSource();
         if (enable) {
             if (countriesDataSource) {
+                this.showGDPonMouseMove();
                 CesiumCountryService.applyGDPOpacity(countriesDataSource, this.getGDPOpacityMap());
             } else {
                 this.setState({
@@ -213,6 +214,43 @@ export default class Countries extends React.Component {
                 CesiumCountryService.removeGDPOpacity(countriesDataSource);
             }
         }
+    }
+
+    showGDPonMouseMove() {
+        var viewer = this.props.cesiumViewer;
+        var scene = viewer.scene;
+        if (!this.handler) {
+            this.handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+        }
+        if (!this.gdpLabelEntity) {
+            this.gdpLabelEntity = viewer.entities.add({
+                label : {
+                    show : false
+                }
+            });
+        }
+        this.handler.setInputAction(movement => {
+            var pickedObject = scene.pick(movement.endPosition);
+            var cartesian = viewer.camera.pickEllipsoid(
+                movement.endPosition,
+                scene.globe.ellipsoid
+            );
+            if (Cesium.defined(pickedObject) && pickedObject.id &&  pickedObject.id.properties) {
+                let gdp = CesiumCountryService.getGDPPerCapita(pickedObject.id.properties);
+                console.log('country : ', pickedObject.id.properties.name);
+                console.log('GDP ',  gdp);
+                this.gdpLabelEntity.label.text = pickedObject.id.properties.name + ' GDP : ' + gdp;
+                console.log('this.gdpLabelEntity.label', this.gdpLabelEntity.label);
+            }
+            if (cartesian) {
+                this.gdpLabelEntity.position = cartesian;
+                this.gdpLabelEntity.label.show = true;
+            } else {
+                this.gdpLabelEntity.label.show = false;
+            }
+
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
     }
 
     getExtrusionByGDPMap = () => {
