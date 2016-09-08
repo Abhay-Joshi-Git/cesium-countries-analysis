@@ -1,8 +1,8 @@
 const defaultColor = {
     red: 255,
     green: 220,
-    blue: 0,
-    alpha: 125
+    blue: 120,
+    alpha: 100
 };
 
 const getDefaultColor = () => {
@@ -68,6 +68,51 @@ export default {
             let entity = entities[i];
             if (entity.polygon) {
                 entity.polygon.material = getDefaultColor();
+            }
+        }
+    },
+
+    applyExtrusionByGDP: function(dataSource, extrusionGDPMap) {
+        var entities = dataSource.entities.values;
+        var len = dataSource.entities.values.length;
+
+        for (var i = 0; i < len; i++) {
+            let entity = entities[i];
+            let GDPPerCapita = this.getGDPPerCapita(entity.properties);
+            let category = extrusionGDPMap.find(item => {
+                return (
+                    ((!item.GDPRange.max) || (item.GDPRange.max > GDPPerCapita))
+                    && (item.GDPRange.min < GDPPerCapita))
+            });
+
+            if (entity.properties.name === 'India' || entity.properties.name === 'Nepal') {
+                console.log(GDPPerCapita, entity.polygon._material._color._value, category);
+            }
+
+            if (category && entity.polygon) {
+                //entity.polygon.outlineWidth = 0.3;
+                entity.polygon.outlineColor = Cesium.Color.fromAlpha(
+                    entity.polygon.outlineColor,
+                    0.2
+                );
+                entity.polygon.extrudedHeight = category.extrudedHeight;
+            }
+        }
+    },
+
+    removeExtrusionByGDP: function(dataSource) {
+        var entities = dataSource.entities.values;
+        var len = dataSource.entities.values.length;
+
+        for (var i = 0; i < len; i++) {
+            let entity = entities[i];
+            if (entity.polygon) {
+                //entity.polygon.outlineWidth = 1.0;
+                entity.polygon.outlineColor = Cesium.Color.fromAlpha(
+                    entity.polygon.outlineColor,
+                    1.0
+                );
+                entity.polygon.extrudedHeight = 0;
             }
         }
     },

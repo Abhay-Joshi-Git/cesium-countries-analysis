@@ -15,7 +15,8 @@ export default class Countries extends React.Component {
         this.state = {
             enableCountries: true,
             colorByEconomy: false,
-            enableGDPOpacity: false
+            enableGDPOpacity: false,
+            extrusionByGDP: false
         }
     }
 
@@ -32,6 +33,7 @@ export default class Countries extends React.Component {
                     {this.getEnableCountriesToggleUI()}
                     {this.getColorByEconomyUI()}
                     {this.getOpacityByGDPUI()}
+                    {this.getExtrusionByGDPUI()}
                 </div>
             </div>
         )
@@ -46,6 +48,21 @@ export default class Countries extends React.Component {
                         checked={this.state.enableGDPOpacity}
                         disabled={!this.state.enableCountries}
                         onChange={this.onEnableGDPOpacity}
+                    />
+                </span>
+            </div>
+        )
+    }
+
+//                        {/*disabled={!this.state.enableCountries}*/}
+    getExtrusionByGDPUI() {
+        return (
+            <div className='well well-sm text-center col-sm-12'>
+                <label>Extrusion By GDP/Capita : </label>
+                <span className='toggle-container'>
+                    <Toggle
+                        checked={this.state.extrusionByGDP}
+                        onChange={this.onExtrusionByGDPChange}
                     />
                 </span>
             </div>
@@ -119,6 +136,12 @@ export default class Countries extends React.Component {
         });
     }
 
+    onExtrusionByGDPChange = () => {
+        this.setState({
+            extrusionByGDP: !this.state.extrusionByGDP
+        })
+    }
+
     componentDidUpdate(prevProps, prevState) {
         if (!this.state.enableCountries) {
             if (this.state.colorByEconomy) {
@@ -132,12 +155,42 @@ export default class Countries extends React.Component {
                     enableGDPOpacity: false
                 });
             }
+
+            // if (this.state.extrusionByGDP) {
+            //     this.setState({
+            //         extrusionByGDP: false
+            //     })
+            // }
         }
         if (this.state.colorByEconomy != prevState.colorByEconomy) {
             this.applyColorByEconomy(this.state.colorByEconomy);
         }
         if (this.state.enableGDPOpacity != prevState.enableGDPOpacity) {
             this.applyGDPOpacity(this.state.enableGDPOpacity);
+        }
+        if (this.state.extrusionByGDP != prevState.extrusionByGDP) {
+            this.applyExtrusionByGDP(this.state.extrusionByGDP);
+        }
+    }
+
+    applyExtrusionByGDP = (enable) => {
+        this.applyExtrusionByGDPDataScouce(enable)
+    }
+
+    applyExtrusionByGDPDataScouce = (enable) => {
+        var countriesDataSource = this.getCountriesDataSource();
+        if (enable) {
+            if (countriesDataSource) {
+                CesiumCountryService.applyExtrusionByGDP(countriesDataSource, this.getExtrusionByGDPMap());
+            } else {
+                this.setState({
+                    extrusionByGDP: false
+                })
+            }
+        } else {
+            if (countriesDataSource && this.props.cesiumViewer.dataSources.contains(countriesDataSource)) {
+                CesiumCountryService.removeExtrusionByGDP(countriesDataSource);
+            }
         }
     }
 
@@ -162,6 +215,31 @@ export default class Countries extends React.Component {
         }
     }
 
+    getExtrusionByGDPMap = () => {
+        return [
+            {
+                GDPRange: {
+                    min: 0,
+                    max: 2000
+                },
+                extrudedHeight: 0
+            },
+            {
+                GDPRange: {
+                    min: 2000,
+                    max: 3000
+                },
+                extrudedHeight: 200000
+            },
+            {
+                GDPRange: {
+                    min: 3000
+                },
+                extrudedHeight: 400000
+            },
+        ];
+    }
+
     getGDPOpacityMap = () => {
         return [
             {
@@ -182,7 +260,7 @@ export default class Countries extends React.Component {
                 GDPRange: {
                     min: 3000
                 },
-                alpha: 0.9                
+                alpha: 0.9
             },
 
         ];
