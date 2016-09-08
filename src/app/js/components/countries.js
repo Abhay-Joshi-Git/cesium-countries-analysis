@@ -54,7 +54,6 @@ export default class Countries extends React.Component {
         )
     }
 
-//                        {/*disabled={!this.state.enableCountries}*/}
     getExtrusionByGDPUI() {
         return (
             <div className='well well-sm text-center col-sm-12'>
@@ -62,6 +61,7 @@ export default class Countries extends React.Component {
                 <span className='toggle-container'>
                     <Toggle
                         checked={this.state.extrusionByGDP}
+                        disabled={!this.state.enableCountries}
                         onChange={this.onExtrusionByGDPChange}
                     />
                 </span>
@@ -156,11 +156,11 @@ export default class Countries extends React.Component {
                 });
             }
 
-            // if (this.state.extrusionByGDP) {
-            //     this.setState({
-            //         extrusionByGDP: false
-            //     })
-            // }
+            if (this.state.extrusionByGDP) {
+                this.setState({
+                    extrusionByGDP: false
+                })
+            }
         }
         if (this.state.colorByEconomy != prevState.colorByEconomy) {
             this.applyColorByEconomy(this.state.colorByEconomy);
@@ -227,16 +227,23 @@ export default class Countries extends React.Component {
             {
                 GDPRange: {
                     min: 2000,
-                    max: 3000
+                    max: 4000
                 },
                 extrudedHeight: 200000
             },
             {
                 GDPRange: {
-                    min: 3000
+                    min: 4000,
+                    max: 6000
                 },
                 extrudedHeight: 400000
             },
+            {
+                GDPRange: {
+                    min: 6000
+                },
+                extrudedHeight: 600000
+            }
         ];
     }
 
@@ -252,17 +259,23 @@ export default class Countries extends React.Component {
             {
                 GDPRange: {
                     min: 2000,
-                    max: 3000
+                    max: 4000
                 },
-                alpha: 0.6
+                alpha: 0.5
             },
             {
                 GDPRange: {
-                    min: 3000
+                    min: 4000,
+                    max: 6000
                 },
-                alpha: 0.9
+                alpha: 0.8
             },
-
+            {
+                GDPRange: {
+                    min: 6000
+                },
+                alpha: 1.0
+            }
         ];
     }
 

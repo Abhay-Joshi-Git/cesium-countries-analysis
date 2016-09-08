@@ -1,8 +1,8 @@
 const defaultColor = {
     red: 255,
     green: 220,
-    blue: 120,
-    alpha: 100
+    blue: 80,
+    alpha: 130
 };
 
 const getDefaultColor = () => {
@@ -13,6 +13,13 @@ const getDefaultColor = () => {
         defaultColor.alpha
     );
 };
+
+const getDefaultOutlineColor = () => {
+    return Cesium.Color.fromAlpha(
+        Cesium.Color.WHITE,
+        0.5
+    );
+}
 
 export default {
     loadCountries: function(viewer, data) {
@@ -26,7 +33,8 @@ export default {
             for (var i = 0; i < len; i++) {
                 let entity = entities[i];
                 if (entity.polygon) {
-                    entity.polygon.material = getDefaultColor()
+                    entity.polygon.outlineColor = getDefaultOutlineColor();
+                    entity.polygon.material = getDefaultColor();
                 }
             }
         }).otherwise(function(error){
@@ -90,10 +98,10 @@ export default {
             }
 
             if (category && entity.polygon) {
-                //entity.polygon.outlineWidth = 0.3;
+                entity.polygon.outlineWidth = 0.3;
                 entity.polygon.outlineColor = Cesium.Color.fromAlpha(
-                    entity.polygon.outlineColor,
-                    0.2
+                    Cesium.Color.BLACK,
+                    0.3
                 );
                 entity.polygon.extrudedHeight = category.extrudedHeight;
             }
@@ -107,11 +115,8 @@ export default {
         for (var i = 0; i < len; i++) {
             let entity = entities[i];
             if (entity.polygon) {
-                //entity.polygon.outlineWidth = 1.0;
-                entity.polygon.outlineColor = Cesium.Color.fromAlpha(
-                    entity.polygon.outlineColor,
-                    1.0
-                );
+                entity.polygon.outlineWidth = 1.0;
+                entity.polygon.outlineColor = getDefaultOutlineColor();
                 entity.polygon.extrudedHeight = 0;
             }
         }
