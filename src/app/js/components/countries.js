@@ -14,7 +14,8 @@ export default class Countries extends React.Component {
         }
         this.state = {
             enableCountries: true,
-            colorByEconomy: false
+            colorByEconomy: false,
+            enableGDPOpacity: false
         }
     }
 
@@ -30,7 +31,23 @@ export default class Countries extends React.Component {
                 <div className='row'>
                     {this.getEnableCountriesToggleUI()}
                     {this.getColorByEconomyUI()}
+                    {this.getOpacityByGDPUI()}
                 </div>
+            </div>
+        )
+    }
+
+    getOpacityByGDPUI() {
+        return (
+            <div className='well well-sm text-center col-sm-12'>
+                <label>Opacity By GDP/Capita : </label>
+                <span className='toggle-container'>
+                    <Toggle
+                        checked={this.state.enableGDPOpacity}
+                        disabled={!this.state.enableCountries}
+                        onChange={this.onEnableGDPOpacity}
+                    />
+                </span>
             </div>
         )
     }
@@ -96,15 +113,79 @@ export default class Countries extends React.Component {
         });
     }
 
+    onEnableGDPOpacity = (event) => {
+        this.setState({
+            enableGDPOpacity: !this.state.enableGDPOpacity
+        });
+    }
+
     componentDidUpdate(prevProps, prevState) {
-        if (!this.state.enableCountries && this.state.colorByEconomy) {
-            this.setState({
-                colorByEconomy: false
-            });
+        if (!this.state.enableCountries) {
+            if (this.state.colorByEconomy) {
+                this.setState({
+                    colorByEconomy: false
+                });
+            }
+
+            if (this.state.enableGDPOpacity) {
+                this.setState({
+                    enableGDPOpacity: false
+                });
+            }
         }
         if (this.state.colorByEconomy != prevState.colorByEconomy) {
             this.applyColorByEconomy(this.state.colorByEconomy);
         }
+        if (this.state.enableGDPOpacity != prevState.enableGDPOpacity) {
+            this.applyGDPOpacity(this.state.enableGDPOpacity);
+        }
+    }
+
+    applyGDPOpacity = (enable) => {
+        this.applyGDPOpacityDataSource(enable);
+    }
+
+    applyGDPOpacityDataSource = (enable) => {
+        var countriesDataSource = this.getCountriesDataSource();
+        if (enable) {
+            if (countriesDataSource) {
+                CesiumCountryService.applyGDPOpacity(countriesDataSource, this.getGDPOpacityMap());
+            } else {
+                this.setState({
+                    enableGDPOpacity: false
+                })
+            }
+        } else {
+            if (countriesDataSource && this.props.cesiumViewer.dataSources.contains(countriesDataSource)) {
+                CesiumCountryService.disableDataSourceMaterial(countriesDataSource);
+            }
+        }
+    }
+
+    getGDPOpacityMap = () => {
+        return [
+            {
+                GDPRange: {
+                    min: 0,
+                    max: 2000
+                },
+                alpha: 0.2
+            },
+            {
+                GDPRange: {
+                    min: 2000,
+                    max: 3000
+                },
+                alpha: 0.6
+            },
+            {
+                GDPRange: {
+                    min: 3000
+                },
+                alpha: 0.9                
+            },
+
+        ];
     }
 
     applyColorByEconomy = (enable) => {
@@ -112,9 +193,13 @@ export default class Countries extends React.Component {
         this.applyColorByEconomyDataSource(enable);
     }
 
-    applyColorByEconomyDataSource = (enable) => {
-        var countriesDataSource = this.props.cesiumViewer.dataSources._dataSources.find(item =>
+    getCountriesDataSource = () => {
+        return this.props.cesiumViewer.dataSources._dataSources.find(item =>
             item.name == 'countriesDataSource');
+    }
+
+    applyColorByEconomyDataSource = (enable) => {
+        var countriesDataSource = this.getCountriesDataSource();
 
         if (enable) {
             if (countriesDataSource) {

@@ -70,8 +70,39 @@ export default {
                 entity.polygon.material = getDefaultColor();
             }
         }
+    },
 
+    applyGDPOpacity: function(dataSource, opacityMap) {
+        var entities = dataSource.entities.values;
+        var len = dataSource.entities.values.length;
+        console.log('entities[0].polygon', entities[0].polygon);
 
+        for (var i = 0; i < len; i++) {
+            let color = Cesium.Color.WHITE;
+            let entity = entities[i];
+            let GDPPerCapita = this.getGDPPerCapita(entity.properties);
+            let category = opacityMap.find(item => {
+                return (
+                    ((!item.GDPRange.max) || (item.GDPRange.max > GDPPerCapita))
+                    && (item.GDPRange.min < GDPPerCapita))
+            });
 
+            if (entity.properties.name === 'India' || entity.properties.name === 'Nepal') {
+                console.log(GDPPerCapita, entity.polygon._material._color._value, category);
+            }
+
+            if (category && entity.polygon) {
+                entity.polygon.material = Cesium.Color.fromAlpha(
+                    entity.polygon._material._color._value,
+                    category.alpha
+                );
+            }
+        }
+    },
+
+    getGDPPerCapita: function(entityProps) {
+        return entityProps.gdp_md_est * 1000000 / entityProps.pop_est;
     }
+
+
 }
