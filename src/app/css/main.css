@@ -28,5 +28,10 @@ body {
 }
 
 .toggle-container {
-    margin-right: 10px;
+    margin: 10px;
+}
+
+/*to encounter margin-bottom given by bootstrap*/
+label {
+    margin-top: 5px;
 }

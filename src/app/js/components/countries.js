@@ -38,9 +38,9 @@ export default class Countries extends React.Component {
 
     getOpacityByGDPUI() {
         return (
-            <div className='well well-sm text-right toggle-container col-sm-12'>
-                <label>Opacity By GDP/Capita : </label>
-                <span className='toggle-span'>
+            <div className='well well-sm toggle-container col-sm-12'>
+                <label className=' col-sm-9'>Opacity By GDP/Capita : </label>
+                <span className='toggle-span col-sm-2'>
                     <Toggle
                         checked={this.state.enableGDPOpacity}
                         disabled={!this.state.enableCountries}
@@ -53,9 +53,9 @@ export default class Countries extends React.Component {
 
     getExtrusionByGDPUI() {
         return (
-            <div className='well well-sm text-right toggle-container col-sm-12'>
-                <label>Extrusion By GDP/Capita : </label>
-                <span className='toggle-span'>
+            <div className='well well-sm toggle-container col-sm-12'>
+                <label className=' col-sm-9'>Extrusion By GDP/Capita : </label>
+                <span className='toggle-span col-sm-2'>
                     <Toggle
                         checked={this.state.extrusionByGDP}
                         disabled={!this.state.enableCountries}
@@ -68,9 +68,9 @@ export default class Countries extends React.Component {
 
     getEnableCountriesToggleUI() {
         return (
-            <div className='well well-sm text-right toggle-container col-sm-12'>
-                <label>Enable Countries : </label>
-                <span className='toggle-span'>
+            <div className='well well-sm toggle-container col-sm-12'>
+                <label className=' col-sm-9'>Enable Countries : </label>
+                <span className='toggle-span col-sm-2'>
                     <Toggle
                         checked={this.state.enableCountries && !!this.props.cesiumViewer}
                         onChange={this.onEnableCountriesChange}
@@ -86,9 +86,9 @@ export default class Countries extends React.Component {
 
     getColorByEconomyToggleUI() {
         return (
-            <div className='well well-sm text-right toggle-container col-sm-12'>
-                <label>Color By Economy : </label>
-                <span className='toggle-span'>
+            <div className='well well-sm toggle-container col-sm-12'>
+                <label className=' col-sm-9'>Color By Economy : </label>
+                <span className='toggle-span col-sm-2'>
                     <Toggle
                         checked={this.state.colorByEconomy}
                         disabled={!this.state.enableCountries}
