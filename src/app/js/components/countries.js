@@ -9,9 +9,6 @@ const colorByEconomicCategoryLegendId = 'colorByEconomicCategory';
 export default class Countries extends React.Component {
     constructor(props) {
         super();
-        if (props.cesiumViewer) {
-            this.loadCountries(props.cesiumViewer);
-        }
         this.state = {
             enableCountries: true,
             colorByEconomy: false,
@@ -41,9 +38,9 @@ export default class Countries extends React.Component {
 
     getOpacityByGDPUI() {
         return (
-            <div className='well well-sm text-center col-sm-12'>
+            <div className='well well-sm text-right toggle-container col-sm-12'>
                 <label>Opacity By GDP/Capita : </label>
-                <span className='toggle-container'>
+                <span className='toggle-span'>
                     <Toggle
                         checked={this.state.enableGDPOpacity}
                         disabled={!this.state.enableCountries}
@@ -56,9 +53,9 @@ export default class Countries extends React.Component {
 
     getExtrusionByGDPUI() {
         return (
-            <div className='well well-sm text-center col-sm-12'>
+            <div className='well well-sm text-right toggle-container col-sm-12'>
                 <label>Extrusion By GDP/Capita : </label>
-                <span className='toggle-container'>
+                <span className='toggle-span'>
                     <Toggle
                         checked={this.state.extrusionByGDP}
                         disabled={!this.state.enableCountries}
@@ -71,9 +68,9 @@ export default class Countries extends React.Component {
 
     getEnableCountriesToggleUI() {
         return (
-            <div className='well well-sm text-center col-sm-12'>
+            <div className='well well-sm text-right toggle-container col-sm-12'>
                 <label>Enable Countries : </label>
-                <span className='toggle-container'>
+                <span className='toggle-span'>
                     <Toggle
                         checked={this.state.enableCountries && !!this.props.cesiumViewer}
                         onChange={this.onEnableCountriesChange}
@@ -89,9 +86,9 @@ export default class Countries extends React.Component {
 
     getColorByEconomyToggleUI() {
         return (
-            <div className='well well-sm text-center col-sm-12'>
+            <div className='well well-sm text-right toggle-container col-sm-12'>
                 <label>Color By Economy : </label>
-                <span className='toggle-container'>
+                <span className='toggle-span'>
                     <Toggle
                         checked={this.state.colorByEconomy}
                         disabled={!this.state.enableCountries}
@@ -114,7 +111,9 @@ export default class Countries extends React.Component {
     }
 
     loadCountries = (viewer) => {
-        CesiumCountryService.loadCountries(viewer, countriesData);
+        if (viewer) {
+            CesiumCountryService.loadCountries(viewer, countriesData);
+        }
     }
 
     removeCountries = (viewer) => {
@@ -217,16 +216,21 @@ export default class Countries extends React.Component {
     }
 
     showGDPonMouseMove() {
-        var viewer = this.props.cesiumViewer;
-        var scene = viewer.scene;
+        var viewer, scene;
+
+        viewer = this.props.cesiumViewer;
+        if (!viewer) return;
+
+        scene = viewer.scene;
         if (!this.handler) {
             this.handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
         }
         if (!this.gdpLabelEntity) {
             this.gdpLabelEntity = viewer.entities.add({
                 label : {
-                    show : false
-                }
+                    show : false,
+                    scale: 0.5
+                },
             });
         }
         this.handler.setInputAction(movement => {
@@ -237,20 +241,16 @@ export default class Countries extends React.Component {
             );
             if (Cesium.defined(pickedObject) && pickedObject.id &&  pickedObject.id.properties) {
                 let gdp = CesiumCountryService.getGDPPerCapita(pickedObject.id.properties);
-                console.log('country : ', pickedObject.id.properties.name);
-                console.log('GDP ',  gdp);
-                this.gdpLabelEntity.label.text = pickedObject.id.properties.name + ' GDP : ' + gdp;
-                console.log('this.gdpLabelEntity.label', this.gdpLabelEntity.label);
+                this.gdpLabelEntity.label.text = pickedObject.id.properties.name + ' GDP/capita : ' + gdp;
             }
             if (cartesian) {
                 this.gdpLabelEntity.position = cartesian;
+                this.gdpLabelEntity.label.eyeOffset = new Cesium.Cartesian3(0, 0, -7000000);
                 this.gdpLabelEntity.label.show = true;
             } else {
                 this.gdpLabelEntity.label.show = false;
             }
-
         }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-
     }
 
     getExtrusionByGDPMap = () => {
